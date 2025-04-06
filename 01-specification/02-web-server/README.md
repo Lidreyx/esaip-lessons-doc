@@ -82,96 +82,96 @@ This file contains **WHAT** your customer expects from the web server.
   This implies to define new HTTP requests to authenticate the user and to create a new user. But
   also to protect the previous HTTP requests which need to be authenticated.
 
-Modification du serveur mise en place :
+### Server Modification Setup:
 
-## ⚙️ Technologies utilisées
+## ⚙️ Technologies Used
 
 - `Dart`
-- `shelf` : framework de serveur HTTP
-- `shelf_router` : pour le routage REST
-- `WebSocket` : pour la communication en temps réel
-- `uuid` : pour la génération d’API keys
-- Fichier local `data.json` : base de données simple pour persistance
+- `shelf`: HTTP server framework
+- `shelf_router`: for REST routing
+- `WebSocket`: for real-time communication
+- `uuid`: for API key generation
+- Local file `data.json`: simple database for persistence
 
 ---
 
-## 📌 Fonctionnalités principales
+## 📌 Main Features
 
-### 1. 🔐 Enregistrement d'un capteur (`POST /register`)
+### 1. 🔐 Sensor Registration (`POST /register`)
 
-Permet à un capteur de s'enregistrer sur le serveur.
+Allows a sensor to register on the server.
 
-- **Entrée JSON** : `{ "id": "capteur123", "type": "accelerometer" }`
-- **Réponse** : API key générée aléatoirement
+- **JSON Input**: `{ "id": "sensor123", "type": "accelerometer" }`
+- **Response**: Randomly generated API key
 
-> ✅ Si déjà enregistré, renvoie une erreur 400.
-
----
-
-### 2. 📋 Liste des capteurs enregistrés (`GET /things`)
-
-Renvoie tous les capteurs enregistrés avec leur type et API key.
+> ✅ If already registered, returns a 400 error.
 
 ---
 
-### 3. 📡 Envoi de données de télémétrie (`POST /telemetry/<id>`)
+### 2. 📋 List of Registered Sensors (`GET /things`)
 
-Un capteur envoie ses données, qui sont timestampées et stockées.
-
-- **Entrée JSON** : `{ "x": 3.4, "y": -1.2, "z": 9.8 }`
-- **Stockage** : `telemetryData[id]` → liste des `{data, timestamp}`
+Returns all registered sensors with their type and API key.
 
 ---
 
-### 4. 📊 Récupération des télémétries (`GET /telemetry/<id>`)
+### 3. 📡 Sending Telemetry Data (`POST /telemetry/<id>`)
 
-Renvoie toutes les données enregistrées pour un capteur.
+A sensor sends its data, which is timestamped and stored.
 
----
-
-### 5. 🧠 Attributs personnalisés (`POST /attributes/<id>?type=client|server`)
-
-Ajoute ou met à jour des attributs liés à un capteur ou au serveur.
-
-- Requiert le header `Authorization` avec la bonne API Key
-- Attributs sont timestampés et stockés
+- **JSON Input**: `{ "x": 3.4, "y": -1.2, "z": 9.8 }`
+- **Storage**: `telemetryData[id]` → list of `{data, timestamp}`
 
 ---
 
-### 6. 🧾 Récupération des attributs (`GET /attributes/<id>?type=client|server`)
+### 4. 📊 Retrieve Telemetry Data (`GET /telemetry/<id>`)
 
-- `type=client` : renvoie les attributs du capteur
-- `type=server` : renvoie les attributs globaux serveur
-- Sans type : renvoie les deux
+Returns all the stored data for a sensor.
 
 ---
 
-### 7. 🗑️ Suppression des attributs (`DELETE /attributes/<id>?type=client|server`)
+### 5. 🧠 Custom Attributes (`POST /attributes/<id>?type=client|server`)
 
-Supprime les attributs d’un capteur ou ceux du serveur.
+Adds or updates attributes related to a sensor or the server.
 
----
-
-### 8. ❌ Désenregistrement (`DELETE /unregister/<id>`)
-
-Supprime un capteur de la base : ses données, attributs, et télémétries.
+- Requires the `Authorization` header with the correct API Key
+- Attributes are timestamped and stored
 
 ---
 
-## 💾 Persistance des données
+### 6. 🧾 Retrieve Attributes (`GET /attributes/<id>?type=client|server`)
 
-Toutes les données sont enregistrées localement dans `data.json` :
+- `type=client`: returns the sensor's attributes
+- `type=server`: returns the server's global attributes
+- Without type: returns both
+
+---
+
+### 7. 🗑️ Delete Attributes (`DELETE /attributes/<id>?type=client|server`)
+
+Deletes the attributes of a sensor or those of the server.
+
+---
+
+### 8. ❌ Unregister (`DELETE /unregister/<id>`)
+
+Deletes a sensor from the database: its data, attributes, and telemetry.
+
+---
+
+## 💾 Data Persistence
+
+All data is stored locally in `data.json`:
 
 ```json
 {
   "thingsRegistry": {
-    "capteur123": { "type": "accelerometer", "apiKey": "xxxx-xxxx" }
+    "sensor123": { "type": "accelerometer", "apiKey": "xxxx-xxxx" }
   },
   "telemetryData": {
-    "capteur123": [{ "data": { "x": 3.4, "y": -1.2 }, "timestamp": "..." }]
+    "sensor123": [{ "data": { "x": 3.4, "y": -1.2 }, "timestamp": "..." }]
   },
   "clientAttributesData": {
-    "capteur123": {
+    "sensor123": {
       "battery": { "value": 88, "timestamp": "..." }
     }
   },
