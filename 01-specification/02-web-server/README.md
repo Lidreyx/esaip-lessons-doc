@@ -81,3 +81,102 @@ This file contains **WHAT** your customer expects from the web server.
   password. The login and the password must be stored in the server. The password must be hashed.
   This implies to define new HTTP requests to authenticate the user and to create a new user. But
   also to protect the previous HTTP requests which need to be authenticated.
+
+Modification du serveur mise en place :
+
+## ⚙️ Technologies utilisées
+
+- `Dart`
+- `shelf` : framework de serveur HTTP
+- `shelf_router` : pour le routage REST
+- `WebSocket` : pour la communication en temps réel
+- `uuid` : pour la génération d’API keys
+- Fichier local `data.json` : base de données simple pour persistance
+
+---
+
+## 📌 Fonctionnalités principales
+
+### 1. 🔐 Enregistrement d'un capteur (`POST /register`)
+
+Permet à un capteur de s'enregistrer sur le serveur.
+
+- **Entrée JSON** : `{ "id": "capteur123", "type": "accelerometer" }`
+- **Réponse** : API key générée aléatoirement
+
+> ✅ Si déjà enregistré, renvoie une erreur 400.
+
+---
+
+### 2. 📋 Liste des capteurs enregistrés (`GET /things`)
+
+Renvoie tous les capteurs enregistrés avec leur type et API key.
+
+---
+
+### 3. 📡 Envoi de données de télémétrie (`POST /telemetry/<id>`)
+
+Un capteur envoie ses données, qui sont timestampées et stockées.
+
+- **Entrée JSON** : `{ "x": 3.4, "y": -1.2, "z": 9.8 }`
+- **Stockage** : `telemetryData[id]` → liste des `{data, timestamp}`
+
+---
+
+### 4. 📊 Récupération des télémétries (`GET /telemetry/<id>`)
+
+Renvoie toutes les données enregistrées pour un capteur.
+
+---
+
+### 5. 🧠 Attributs personnalisés (`POST /attributes/<id>?type=client|server`)
+
+Ajoute ou met à jour des attributs liés à un capteur ou au serveur.
+
+- Requiert le header `Authorization` avec la bonne API Key
+- Attributs sont timestampés et stockés
+
+---
+
+### 6. 🧾 Récupération des attributs (`GET /attributes/<id>?type=client|server`)
+
+- `type=client` : renvoie les attributs du capteur
+- `type=server` : renvoie les attributs globaux serveur
+- Sans type : renvoie les deux
+
+---
+
+### 7. 🗑️ Suppression des attributs (`DELETE /attributes/<id>?type=client|server`)
+
+Supprime les attributs d’un capteur ou ceux du serveur.
+
+---
+
+### 8. ❌ Désenregistrement (`DELETE /unregister/<id>`)
+
+Supprime un capteur de la base : ses données, attributs, et télémétries.
+
+---
+
+## 💾 Persistance des données
+
+Toutes les données sont enregistrées localement dans `data.json` :
+
+```json
+{
+  "thingsRegistry": {
+    "capteur123": { "type": "accelerometer", "apiKey": "xxxx-xxxx" }
+  },
+  "telemetryData": {
+    "capteur123": [{ "data": { "x": 3.4, "y": -1.2 }, "timestamp": "..." }]
+  },
+  "clientAttributesData": {
+    "capteur123": {
+      "battery": { "value": 88, "timestamp": "..." }
+    }
+  },
+  "serverAttributes": {
+    "mode": { "value": "eco", "timestamp": "..." }
+  }
+}
+```
